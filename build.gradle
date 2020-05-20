@@ -1,0 +1,62 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+    defaultConfig {
+        minSdkVersion 18
+        ndk {
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64', "mips", "mips64"
+        }
+    }
+    buildTypes {
+        def logProguard = rootProject.ext.android.get('logProguard')
+        release {
+            minifyEnabled enable.toBoolean()
+            if (logProguard != null && new File(logProguard).exists()) {
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', logProguard
+            } else {
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+
+        debug {
+            minifyEnabled enable.toBoolean()
+            if (logProguard != null && new File(logProguard).exists()) {
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', logProguard
+            } else {
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+    }
+
+    dexOptions {
+        dexInProcess true
+        preDexLibraries true
+        javaMaxHeapSize "4g"//越大越好
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    if (enable.toBoolean()) {
+        api 'com.proton.ecg.card:algorithm:1.2.1'
+    } else {
+        api project(':ecgAlgorithm')
+//        api 'com.proton.ecg.card:algorithm:1.1.7-alpha02'
+    }
+//    api project(':ble')
+    api 'com.wms:ble:1.1.1-alpha7'
+    implementation 'com.wms:logger:1.0.1'
+    implementation 'no.nordicsemi.android:dfu:1.9.1'
+    //implementation project(':baseConnector')
+}
+
+if (enable.toBoolean()) {
+   File file = new File('/Users/wangmengsi/Desktop/upload.gradle')
+   if (file.exists()) {
+       apply from: file.absolutePath
+   }
+}
